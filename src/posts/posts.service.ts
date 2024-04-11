@@ -3,11 +3,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { Repository } from 'typeorm';
+import { POSTS_REPOSITORY } from './constants/posts.constants';
 
 @Injectable()
 export class PostsService {
   constructor(
-    @Inject('POST_REPOSITORY')
+    @Inject(POSTS_REPOSITORY)
     private postRepository: Repository<Post>,
   ) {}
 

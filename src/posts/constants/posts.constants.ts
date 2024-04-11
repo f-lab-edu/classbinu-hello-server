@@ -1,0 +1,2 @@
+export const POSTS_REPOSITORY = 'POSTS_REPOSITORY';
+export const DATA_SOURCE = 'DATA_SOURCE';
