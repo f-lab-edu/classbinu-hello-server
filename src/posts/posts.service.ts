@@ -22,11 +22,11 @@ export class PostsService {
   }
 
   async findAll() {
-    return await `This action returns all posts`;
+    return await this.postRepository.find();
   }
 
   async findOne(id: number) {
-    return await `This action returns a #${id} post`;
+    return await this.postRepository.findOne({ where: { id } });
   }
 
   async update(id: number, updatePostDto: UpdatePostDto) {
@@ -34,10 +34,10 @@ export class PostsService {
   }
 
   async incrementViews(id: number) {
-    return await this.postRepository.increment({ id }, 'views', 1);
+    await this.postRepository.increment({ id }, 'views', 1);
   }
 
   async remove(id: number) {
-    return await `This action removes a #${id} post`;
+    return await this.postRepository.delete(id);
   }
 }
