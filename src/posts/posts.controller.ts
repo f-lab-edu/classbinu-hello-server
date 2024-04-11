@@ -35,6 +35,11 @@ export class PostsController {
     return await this.postsService.update(+id, updatePostDto);
   }
 
+  @Patch(':id/views')
+  async incrementViews(@Param('id') id: string) {
+    return await this.postsService.incrementViews(+id);
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.postsService.remove(+id);

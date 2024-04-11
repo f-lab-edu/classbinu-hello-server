@@ -33,6 +33,10 @@ export class PostsService {
     return await this.postRepository.update(id, updatePostDto);
   }
 
+  async incrementViews(id: number) {
+    return await this.postRepository.increment({ id }, 'views', 1);
+  }
+
   async remove(id: number) {
     return await `This action removes a #${id} post`;
   }
