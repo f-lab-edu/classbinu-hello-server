@@ -7,4 +7,10 @@ export default () => ({
     name: process.env.DB_NAME,
     port: parseInt(process.env.DB_PORT) || 5432,
   },
+  swaggerApi: {
+    title: '오늘의 일기 API',
+    description: '오늘의 일기 API Description',
+    version: '0.1',
+    apiRoot: process.env.SWAGGER_API_ROOT,
+  },
 });

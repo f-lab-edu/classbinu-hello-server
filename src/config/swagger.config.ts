@@ -1,8 +1,9 @@
 import { DocumentBuilder } from '@nestjs/swagger';
+import config from './configuration';
 
 export const swaggerConfig = new DocumentBuilder()
-  .setTitle('오늘의 일기 API')
-  .setDescription('오늘의 일기 API description')
-  .setVersion('0.1')
+  .setTitle(config().swaggerApi.title)
+  .setDescription(config().swaggerApi.description)
+  .setVersion(config().swaggerApi.version)
   .addBearerAuth()
   .build();

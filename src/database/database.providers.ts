@@ -14,6 +14,7 @@ export const databaseProviders = [
         port: configService.get<number>('db.port'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         synchronize: true,
+        logging: ['query', 'error', 'schema'],
       });
 
       return dataSource.initialize();
