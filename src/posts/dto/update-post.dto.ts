@@ -33,5 +33,5 @@ export class UpdatePostDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsInt()
-  count_view?: number;
+  views?: number;
 }
