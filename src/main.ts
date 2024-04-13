@@ -8,7 +8,11 @@ import { swaggerConfig } from './config/swagger.config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
 
   const apiRoot = config().swaggerApi.apiRoot;
   const documnet = SwaggerModule.createDocument(app, swaggerConfig);
