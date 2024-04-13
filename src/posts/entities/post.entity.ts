@@ -20,7 +20,7 @@ export class Post {
   content: string;
 
   @Column({ default: 0 })
-  viewCount: number;
+  views: number;
 
   @Column({ type: 'enum', enum: PostStatus, default: PostStatus.PUBLIC })
   status: PostStatus;
