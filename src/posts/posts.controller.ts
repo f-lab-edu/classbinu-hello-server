@@ -29,7 +29,6 @@ export class PostsController {
 
   @Get(':id')
   async findOne(@Param('id') id: number) {
-    console.log(id);
     return await this.postsService.findOne(id);
   }
 
