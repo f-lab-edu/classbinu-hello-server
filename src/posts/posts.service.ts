@@ -15,10 +15,7 @@ export class PostsService {
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
     const post = new Post();
-    post.title = createPostDto.title;
-    post.content = createPostDto.content;
-    post.status = createPostDto.status;
-    post.onlyTeacher = createPostDto.onlyTeacher;
+    Object.assign(post, createPostDto);
     return await this.postRepository.save(post);
   }
 
