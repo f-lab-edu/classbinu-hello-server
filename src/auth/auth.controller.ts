@@ -5,6 +5,7 @@ import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { Request } from 'express';
 import { AuthDto } from './dtos/auth.dto';
 import { AccessTokenGuard } from './guards/access-token.guard';
+import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -25,5 +26,13 @@ export class AuthController {
   @Get('logout')
   logout(@Req() req: Request) {
     return this.authService.logout(req.user['sub']);
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Get('refresh')
+  async refresh(@Req() req: Request) {
+    const userId = req.user['sub'];
+    const refreshToken = req.user['refreshToken'];
+    return this.authService.refreshTokens(userId, refreshToken);
   }
 }
