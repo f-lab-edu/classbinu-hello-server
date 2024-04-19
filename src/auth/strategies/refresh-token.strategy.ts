@@ -16,7 +16,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey,
-      passReqToCallback: true, // validate에 req를 전달하기 위해 true로 설정
+      passReqToCallback: true,
     });
   }
 
