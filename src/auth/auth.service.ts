@@ -2,23 +2,22 @@ import * as argon2 from 'argon2';
 
 import {
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 
 import { AuthDto } from './dtos/auth.dto';
-import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
-import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
+import { TokenStrategy } from './strategies/token.strategy';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    @Inject('TokenStrategy') private tokenStrategy: TokenStrategy,
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
@@ -47,7 +46,10 @@ export class AuthService {
       ...createUserDto,
       password: hash,
     });
-    const tokens = await this.getTokens(newUser.id, newUser.username);
+    const tokens = await this.tokenStrategy.createTokens(
+      newUser.id,
+      newUser.username,
+    );
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
     return tokens;
   }
@@ -62,7 +64,10 @@ export class AuthService {
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const tokens = await this.getTokens(user.id, user.username);
+    const tokens = await this.tokenStrategy.createTokens(
+      user.id,
+      user.username,
+    );
     await this.updateRefreshToken(user.id, tokens.refreshToken);
     return tokens;
   }
@@ -82,41 +87,6 @@ export class AuthService {
     });
   }
 
-  async getTokens(userId: number, username: string) {
-    const accessToken = await this.createToken(
-      userId,
-      username,
-      'jwt.accessSecret',
-      '15m',
-    );
-    const refreshToken = await this.createToken(
-      userId,
-      username,
-      'jwt.refreshSecret',
-      '7d',
-    );
-
-    return { accessToken, refreshToken };
-  }
-
-  async createToken(
-    userId: number,
-    username: string,
-    secretKey: string,
-    expiresIn: string,
-  ) {
-    return this.jwtService.signAsync(
-      {
-        sub: userId,
-        username,
-      },
-      {
-        secret: this.configService.get(secretKey),
-        expiresIn,
-      },
-    );
-  }
-
   async refreshTokens(userId: number, refreshToken: string) {
     const user = await this.usersService.findOne(userId);
     if (!user) {
@@ -133,7 +103,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const tokens = await this.getTokens(user.id, user.username);
+    const tokens = await this.tokenStrategy.createTokens(
+      user.id,
+      user.username,
+    );
     await this.updateRefreshToken(user.id, tokens.refreshToken);
     return tokens;
   }

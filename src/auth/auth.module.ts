@@ -1,3 +1,8 @@
+import {
+  DevTokenStrategy,
+  LocalTokenStrategy,
+} from './strategies/token.strategy';
+
 import { AccessTokenStrategy } from './strategies/access-token.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -9,7 +14,18 @@ import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.register({})],
-  providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],
+  providers: [
+    AuthService,
+    AccessTokenStrategy,
+    RefreshTokenStrategy,
+    {
+      provide: 'TokenStrategy',
+      useClass:
+        process.env.NODE_ENV === 'development'
+          ? DevTokenStrategy
+          : LocalTokenStrategy,
+    },
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}
