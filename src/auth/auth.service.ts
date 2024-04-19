@@ -68,6 +68,10 @@ export class AuthService {
   }
 
   async logout(userId: number) {
+    const user = await this.usersService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return this.usersService.update(userId, { refreshToken: null });
   }
 
