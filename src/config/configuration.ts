@@ -13,4 +13,8 @@ export default () => ({
     version: '0.1',
     apiRoot: process.env.SWAGGER_API_ROOT,
   },
+  jwt: {
+    accessSecret: process.env.ACCESS_SECRET,
+    refreshSecret: process.env.REFRESH_SECRET,
+  },
 });
