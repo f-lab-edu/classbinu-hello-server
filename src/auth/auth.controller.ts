@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { AuthDto } from './dtos/auth.dto';
 import { AccessTokenGuard } from './guards/access-token.guard';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
+import { JWT_CLAIMS } from './constants/auth.constatns';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -25,14 +26,14 @@ export class AuthController {
   @UseGuards(AccessTokenGuard)
   @Get('logout')
   logout(@Req() req: Request) {
-    return this.authService.logout(req.user['sub']);
+    return this.authService.logout(req.user[JWT_CLAIMS.SUB]);
   }
 
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
   async refresh(@Req() req: Request) {
-    const userId = req.user['sub'];
-    const refreshToken = req.user['refreshToken'];
+    const userId = req.user[JWT_CLAIMS.SUB];
+    const refreshToken = req.user[JWT_CLAIMS.REFRESH_TOKEN];
     return this.authService.refreshTokens(userId, refreshToken);
   }
 }
