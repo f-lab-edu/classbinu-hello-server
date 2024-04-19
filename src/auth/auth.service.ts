@@ -1,6 +1,11 @@
 import * as argon2 from 'argon2';
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { AuthDto } from './dtos/auth.dto';
 import { ConfigService } from '@nestjs/config';
@@ -34,7 +39,7 @@ export class AuthService {
       createUserDto.username,
     );
     if (userExists) {
-      throw new BadRequestException('User already exists');
+      throw new ConflictException('Username already exists');
     }
 
     const hash = await this.hashData(createUserDto.password);
@@ -50,12 +55,12 @@ export class AuthService {
   async login(auth: AuthDto) {
     const user = await this.usersService.findByUsername(auth.username);
     if (!user) {
-      throw new BadRequestException('User does not exist');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const passwordMatches = await argon2.verify(user.password, auth.password);
     if (!passwordMatches) {
-      throw new BadRequestException('Password is incorrect');
+      throw new UnauthorizedException('Invalid credentials');
     }
     const tokens = await this.getTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
@@ -110,15 +115,18 @@ export class AuthService {
 
   async refreshTokens(userId: number, refreshToken: string) {
     const user = await this.usersService.findOne(userId);
-    if (!user || !user.refreshToken) {
-      throw new BadRequestException('Access Denied');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (!user.refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
     }
     const refreshTokenMatches = await argon2.verify(
       user.refreshToken,
       refreshToken,
     );
     if (!refreshTokenMatches) {
-      throw new BadRequestException('Access Denied');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const tokens = await this.getTokens(user.id, user.username);
