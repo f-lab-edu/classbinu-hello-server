@@ -1,4 +1,11 @@
-import { IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { PostStatus } from '../enums/posts.enum';
@@ -14,10 +21,14 @@ export class CreatePostDto {
   @IsString()
   readonly content: string;
 
+  @IsOptional()
+  @IsNumber()
+  userId?: number;
+
   @ApiProperty({ example: PostStatus.PUBLIC })
   @IsNotEmpty()
   @IsEnum(PostStatus)
-  readonly status: PostStatus;
+  status: PostStatus;
 
   @ApiProperty({ example: false })
   @IsNotEmpty()
