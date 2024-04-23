@@ -32,7 +32,7 @@ export class PostsService {
   }
 
   async incrementViews(id: number) {
-    await this.postRepository.increment({ id }, 'views', 1);
+    return await this.postRepository.increment({ id }, 'views', 1);
   }
 
   async remove(id: number) {
