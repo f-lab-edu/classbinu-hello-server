@@ -14,8 +14,7 @@ export class PostsService {
   ) {}
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
-    const post = new Post();
-    Object.assign(post, createPostDto);
+    const post = new Post(createPostDto);
     return await this.postRepository.save(post);
   }
 
@@ -24,7 +23,7 @@ export class PostsService {
   }
 
   async findOne(id: number) {
-    return await this.postRepository.findOne({ where: { id } });
+    return await this.postRepository.findOneBy({ id });
   }
 
   async update(id: number, updatePostDto: UpdatePostDto) {

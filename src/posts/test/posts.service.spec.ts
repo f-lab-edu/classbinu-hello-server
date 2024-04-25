@@ -13,7 +13,7 @@ describe('PostsService', () => {
     mockPostRepository = {
       save: jest.fn().mockResolvedValue({ id: 1 }),
       find: jest.fn().mockResolvedValue([{ id: 1 }]),
-      findOne: jest.fn().mockResolvedValue({ id: 1 }),
+      findOneBy: jest.fn().mockResolvedValue({ id: 1 }),
       update: jest.fn().mockResolvedValue({ id: 1 }),
       increment: jest.fn().mockResolvedValue({ id: 1 }),
       delete: jest.fn().mockResolvedValue({ id: 1 }),
@@ -52,9 +52,7 @@ describe('PostsService', () => {
 
   it('should find one post', async () => {
     expect(await service.findOne(1)).toEqual({ id: 1 });
-    expect(mockPostRepository.findOne).toHaveBeenCalledWith({
-      where: { id: 1 },
-    });
+    expect(mockPostRepository.findOneBy).toHaveBeenCalledWith({ id: 1 });
   });
 
   it('should update a post', async () => {

@@ -6,12 +6,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { CreatePostDto } from '../dto/create-post.dto';
 import { PostStatus } from '../enums/posts.enum';
 
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column()
+  userId: number;
 
   @Column()
   title: string;
@@ -33,4 +37,14 @@ export class Post {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  constructor(createPostDto?: CreatePostDto) {
+    if (createPostDto) {
+      this.title = createPostDto.title;
+      this.content = createPostDto.content;
+      this.userId = createPostDto.userId;
+      this.status = createPostDto.status;
+      this.onlyTeacher = createPostDto.onlyTeacher;
+    }
+  }
 }

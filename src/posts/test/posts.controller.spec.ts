@@ -1,12 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { CreatePostDto } from '../dto/create-post.dto';
+import { Post } from '../entities/post.entity';
+import { PostOwnerGuard } from '../guards/post-owner.guard';
 import { PostsController } from '../posts.controller';
 import { PostsService } from '../posts.service';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('PostsController', () => {
   let controller: PostsController;
   let mockPostsService: jest.Mocked<Partial<PostsService>>;
+  let mockPostOwnerGuard: jest.Mocked<Partial<PostOwnerGuard>>;
+  let mockRepository: Partial<Repository<Post>>;
+  const userId = 1;
 
   beforeEach(async () => {
     mockPostsService = {
@@ -17,12 +24,25 @@ describe('PostsController', () => {
       incrementViews: jest.fn().mockResolvedValue({ id: 1 }),
       remove: jest.fn().mockResolvedValue({ id: 1 }),
     };
+
+    mockPostOwnerGuard = {
+      canActivate: jest.fn().mockReturnValue(true),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostsController],
       providers: [
         {
           provide: PostsService,
           useValue: mockPostsService,
+        },
+        {
+          provide: PostOwnerGuard,
+          useValue: mockPostOwnerGuard,
+        },
+        {
+          provide: getRepositoryToken(Post),
+          useValue: mockRepository,
         },
       ],
     }).compile();
@@ -39,7 +59,10 @@ describe('PostsController', () => {
       title: 'title',
       content: 'content',
     } as CreatePostDto;
-    expect(await controller.create(createPostDto)).toEqual({ id: 1 });
+
+    expect(await controller.create(createPostDto, userId)).toEqual({
+      id: 1,
+    });
     expect(mockPostsService.create).toHaveBeenCalledWith(createPostDto);
   });
 
@@ -58,7 +81,10 @@ describe('PostsController', () => {
       title: 'title',
       content: 'content',
     } as CreatePostDto;
-    expect(await controller.update(1, updatePostDto)).toEqual({ id: 1 });
+
+    expect(await controller.update(1, updatePostDto)).toEqual({
+      id: 1,
+    });
     expect(mockPostsService.update).toHaveBeenCalledWith(1, updatePostDto);
   });
 
@@ -68,7 +94,9 @@ describe('PostsController', () => {
   });
 
   it('should remove a post', async () => {
-    expect(await controller.remove('1')).toEqual({ id: 1 });
-    expect(mockPostsService.remove).toHaveBeenCalledWith(1);
+    expect(await controller.remove(1)).toEqual({
+      id: 1,
+    });
+    expect(mockPostsService.remove).toHaveBeenCalledWith(1, 1);
   });
 });
