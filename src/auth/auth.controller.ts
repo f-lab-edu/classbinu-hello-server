@@ -1,7 +1,7 @@
-import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from 'src/users/dtos/create-user.dto';
+import { CreateUserDto } from '../users/dtos/create-user.dto';
 import { Request } from 'express';
 import { AuthDto } from './dtos/auth.dto';
 import { AccessTokenGuard } from './guards/access-token.guard';
@@ -19,18 +19,18 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() auth: AuthDto) {
-    return this.authService.login(auth);
+  async login(@Body() authDto: AuthDto) {
+    return this.authService.login(authDto);
   }
 
   @UseGuards(AccessTokenGuard)
-  @Get('logout')
+  @Post('logout')
   logout(@Req() req: Request) {
     return this.authService.logout(req.user[JWT_CLAIMS.SUB]);
   }
 
   @UseGuards(RefreshTokenGuard)
-  @Get('refresh')
+  @Post('refresh')
   async refresh(@Req() req: Request) {
     const userId = req.user[JWT_CLAIMS.SUB];
     const refreshToken = req.user[JWT_CLAIMS.REFRESH_TOKEN];

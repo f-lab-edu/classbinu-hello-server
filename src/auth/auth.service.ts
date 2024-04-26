@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 
 import { AuthDto } from './dtos/auth.dto';
-import { CreateUserDto } from 'src/users/dtos/create-user.dto';
-import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from '../users/dtos/create-user.dto';
+import { UsersService } from '../users/users.service';
 import { TokenStrategy } from './strategies/token.strategy';
 
 @Injectable()
@@ -54,13 +54,16 @@ export class AuthService {
     return tokens;
   }
 
-  async login(auth: AuthDto) {
-    const user = await this.usersService.findByUsername(auth.username);
+  async login(authDto: AuthDto) {
+    const user = await this.usersService.findByUsername(authDto.username);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const passwordMatches = await argon2.verify(user.password, auth.password);
+    const passwordMatches = await argon2.verify(
+      user.password,
+      authDto.password,
+    );
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -73,10 +76,6 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    const user = await this.usersService.findOne(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
     return this.usersService.update(userId, { refreshToken: null });
   }
 
