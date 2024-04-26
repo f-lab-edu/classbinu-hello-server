@@ -12,7 +12,7 @@ describe('PostsController', () => {
   let controller: PostsController;
   let mockPostsService: jest.Mocked<Partial<PostsService>>;
   let mockPostOwnerGuard: jest.Mocked<Partial<PostOwnerGuard>>;
-  let mockRepository: Partial<Repository<Post>>;
+  let mockRepository: jest.Mocked<Partial<Repository<Post>>>;
   const userId = 1;
 
   beforeEach(async () => {
@@ -97,6 +97,6 @@ describe('PostsController', () => {
     expect(await controller.remove(1)).toEqual({
       id: 1,
     });
-    expect(mockPostsService.remove).toHaveBeenCalledWith(1, 1);
+    expect(mockPostsService.remove).toHaveBeenCalledWith(1);
   });
 });
