@@ -10,7 +10,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
 import { TokenStrategy } from '../strategies/token.strategy';
 import { User } from 'src/users/entities/user.entity';
-import { UsersService } from '../../users/users.service';
+import { UsersService } from 'src/users/users.service';
 
 describe('AuthService', () => {
   let service: AuthService;
