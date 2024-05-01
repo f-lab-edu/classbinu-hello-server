@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { Module } from '@nestjs/common';
 import { PostsModule } from './posts/posts.module';
+import { TopicsModule } from './topics/topics.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -13,9 +14,10 @@ import configuration from './config/configuration';
       load: [configuration],
       isGlobal: true,
     }),
+    DatabaseModule,
     AuthModule,
     PostsModule,
-    DatabaseModule,
+    TopicsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
