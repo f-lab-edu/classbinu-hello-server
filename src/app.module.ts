@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { Module } from '@nestjs/common';
 import { PostsModule } from './posts/posts.module';
 import { TopicsModule } from './topics/topics.module';
+import { ClassroomsModule } from './classrooms/classrooms.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -18,6 +19,7 @@ import configuration from './config/configuration';
     AuthModule,
     PostsModule,
     TopicsModule,
+    ClassroomsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
