@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { CreateClassroomDto } from '../dto/create-classroom.dto';
+
 @Entity()
 export class Classroom {
   @PrimaryGeneratedColumn()
@@ -38,4 +40,15 @@ export class Classroom {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  constructor(createClassroomDto?: CreateClassroomDto) {
+    if (createClassroomDto) {
+      this.schoolYear = createClassroomDto.schoolYear;
+      this.grade = createClassroomDto.grade;
+      this.classSection = createClassroomDto.classSection;
+      this.bio = createClassroomDto.bio;
+      this.pin = createClassroomDto.pin;
+      this.isActive = true;
+    }
+  }
 }

@@ -1,11 +1,13 @@
+import { DeleteResult, UpdateResult } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { Classroom } from '../entities/classroom.entity';
+import { ClassroomStudent } from '../entities/classroom_student.entity';
 import { ClassroomsController } from '../classrooms.controller';
 import { ClassroomsService } from '../classrooms.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
+import { JoinClassroomDto } from '../dto/join-classroom.dto';
 import { NotFoundException } from '@nestjs/common';
-import { UpdateResult } from 'typeorm';
 
 describe('ClassroomsController', () => {
   let controller: ClassroomsController;
@@ -18,8 +20,11 @@ describe('ClassroomsController', () => {
       findOne: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
+      joinClassroom: jest.fn(),
+      findClassroomStudents: jest.fn(),
+      updateClassromStudent: jest.fn(),
+      leaveClassroom: jest.fn(),
     } as any;
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ClassroomsController],
       providers: [
@@ -47,10 +52,11 @@ describe('ClassroomsController', () => {
 
       mockClassroomsService.create.mockResolvedValue(expectedClassroom);
 
-      const result = await controller.create(createClassroomDto);
+      const result = await controller.create(createClassroomDto, 1);
       expect(result).toEqual(expectedClassroom);
       expect(mockClassroomsService.create).toHaveBeenCalledWith(
         createClassroomDto,
+        1,
       );
     });
   });
@@ -144,6 +150,87 @@ describe('ClassroomsController', () => {
       mockClassroomsService.remove.mockRejectedValue(expectedError);
 
       await expect(controller.remove(1)).rejects.toThrow(expectedError);
+    });
+  });
+
+  describe('joinClassroom', () => {
+    it('정상 요청인 경우 학급 가입 서비스를 호출하고 학급 가입 결과를 반환해야 한다.', async () => {
+      const expectedClassroom = {
+        id: 1,
+      } as Classroom;
+
+      const joinClassroomDto = {
+        pin: '1234',
+      } as JoinClassroomDto;
+
+      mockClassroomsService.joinClassroom.mockResolvedValue(
+        expectedClassroom as any,
+      );
+
+      const result = await controller.joinClassroom(1, joinClassroomDto, 1);
+      expect(result).toEqual(expectedClassroom);
+      expect(mockClassroomsService.joinClassroom).toHaveBeenCalledWith(1, 1, {
+        pin: '1234',
+      });
+    });
+  });
+
+  describe('findClassroomStudents', () => {
+    it('특정 학급의 학생을 반환해야 한다.', async () => {
+      const expectedStudents = [
+        {
+          id: 1,
+        },
+      ] as ClassroomStudent[];
+
+      mockClassroomsService.findClassroomStudents.mockResolvedValue(
+        expectedStudents,
+      );
+
+      const result = await controller.findStudents(1);
+      expect(result).toEqual(expectedStudents);
+    });
+  });
+
+  describe('updateClassromStudent', () => {
+    it('특정 학급의 학생을 수정(활성/비활성)해야 한다.', async () => {
+      const expectedClassroomStudent = {
+        affected: 1,
+      } as UpdateResult;
+
+      mockClassroomsService.updateClassromStudent.mockResolvedValue(
+        expectedClassroomStudent,
+      );
+
+      const result = await controller.updateClassromStudent(1, 1, {
+        isActive: false,
+      });
+      expect(result).toEqual(expectedClassroomStudent);
+    });
+  });
+
+  describe('leaveClassroom', () => {
+    it('특정 학급을 나가야 한다.', async () => {
+      const expectedClassroomStudent = {
+        affected: 1,
+      } as DeleteResult;
+
+      mockClassroomsService.leaveClassroom.mockResolvedValue(
+        expectedClassroomStudent,
+      );
+
+      const result = await controller.leaveClassroom(1, 1);
+      expect(result).toEqual(expectedClassroomStudent);
+    });
+
+    it('나갈 학급이 없는 경우 404 에러를 반환해야 한다.', async () => {
+      const expectedError = new NotFoundException();
+
+      mockClassroomsService.leaveClassroom.mockRejectedValue(expectedError);
+
+      await expect(controller.leaveClassroom(1, 1)).rejects.toThrow(
+        expectedError,
+      );
     });
   });
 });
