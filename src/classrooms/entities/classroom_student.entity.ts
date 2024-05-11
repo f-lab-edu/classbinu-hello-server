@@ -2,22 +2,27 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Classroom } from './classroom.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class ClassroomStudent {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // TODO: 외래키 설정
-  @Column()
-  classroom: number;
+  @ManyToOne(() => Classroom)
+  @JoinColumn({ name: 'classroom_id' })
+  classroom: Classroom;
 
-  // TODO: 외래키 설정
-  @Column()
-  studentId: number;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'student_id' })
+  student: User;
 
   @Column({ default: true })
   isActive: boolean;

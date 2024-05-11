@@ -65,6 +65,9 @@ export class ClassroomsService {
   ) {
     const pin = joinClassroomDto.pin;
     const classroom = await this.classroomRepository.findOneBy({ id });
+    const user = await this.classroomStudentRepository.findOneBy({
+      id: userId,
+    });
 
     if (!classroom) {
       throw new NotFoundException(`Classroom with ID ${id} not found.`);
@@ -74,28 +77,27 @@ export class ClassroomsService {
     }
 
     return await this.classroomStudentRepository.save({
-      classroom: id,
-      studentId: userId,
+      classroom: classroom,
+      student: user,
       isActive: true,
     });
   }
 
   async findClassroomStudents(id: number) {
     return await this.classroomStudentRepository.find({
-      where: { classroom: id },
+      where: { classroom: { id: id } },
+      relations: ['student'],
     });
   }
 
+  // 학급에 가입한 학생의 활성/비활성 상태를 변경합니다.
   async updateClassromStudent(
     id: number,
     studentId: number,
     updateDto: UpdateClassroomStudentDto,
   ) {
     const result = await this.classroomStudentRepository.update(
-      {
-        classroom: id,
-        studentId,
-      },
+      { classroom: { id }, student: { id: studentId } },
       updateDto,
     );
 
@@ -110,8 +112,8 @@ export class ClassroomsService {
 
   async leaveClassroom(id: number, userId: number) {
     const result = await this.classroomStudentRepository.delete({
-      classroom: id,
-      studentId: userId,
+      classroom: { id },
+      student: { id: userId },
     });
 
     if (result.affected === 0) {

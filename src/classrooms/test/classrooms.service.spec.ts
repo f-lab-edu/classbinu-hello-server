@@ -270,8 +270,8 @@ describe('ClassroomsService', () => {
       expect(result).toEqual(updateResult);
       expect(mockClassroomStudentRepository.update).toHaveBeenCalledWith(
         {
-          classroom: 1,
-          studentId: 1,
+          classroom: { id: 1 },
+          student: { id: 1 },
         },
         updateClassroomStudentDto,
       );
@@ -292,8 +292,8 @@ describe('ClassroomsService', () => {
       expect(result).rejects.toThrow(expectedError);
       expect(mockClassroomStudentRepository.update).toHaveBeenCalledWith(
         {
-          classroom: 1,
-          studentId: 1,
+          classroom: { id: 1 },
+          student: { id: 1 },
         },
         updateClassroomStudentDto,
       );
@@ -313,8 +313,8 @@ describe('ClassroomsService', () => {
       const result = await service.leaveClassroom(1, 1);
       expect(result).toEqual(expectedDeleteResult);
       expect(mockClassroomStudentRepository.delete).toHaveBeenCalledWith({
-        classroom: 1,
-        studentId: 1,
+        classroom: { id: 1 },
+        student: { id: 1 },
       });
     });
 
@@ -328,8 +328,8 @@ describe('ClassroomsService', () => {
 
       expect(result).rejects.toThrow(expectedError);
       expect(mockClassroomStudentRepository.delete).toHaveBeenCalledWith({
-        classroom: 1,
-        studentId: 1,
+        classroom: { id: 1 },
+        student: { id: 1 },
       });
     });
   });
