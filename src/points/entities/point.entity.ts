@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  Entity,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -9,6 +10,7 @@ import {
 
 import { User } from 'src/users/entities/user.entity';
 
+@Entity()
 export class Point {
   @PrimaryGeneratedColumn()
   id: number;

@@ -4,17 +4,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { EventBus } from '@nestjs/cqrs';
+import { UserCreatedEvent } from './events/user-created.event';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private eventBus: EventBus,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.userRepository.create(createUserDto);
-    return this.userRepository.save(user);
+    const newUser = this.userRepository.create(createUserDto);
+    const user = await this.userRepository.save(newUser);
+    this.eventBus.publish(new UserCreatedEvent(user.id));
+    return user;
   }
 
   async findAll(): Promise<User[]> {
