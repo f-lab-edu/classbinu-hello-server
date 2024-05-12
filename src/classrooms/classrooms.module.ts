@@ -1,4 +1,5 @@
-import { Classroom } from './entities/classroom.entity';
+import { Authenticator, Classroom } from './entities/classroom.entity';
+
 import { ClassroomStudent } from './entities/classroom_student.entity';
 import { ClassroomsController } from './classrooms.controller';
 import { ClassroomsService } from './classrooms.service';
@@ -9,6 +10,6 @@ import { User } from 'src/users/entities/user.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Classroom, ClassroomStudent, User])],
   controllers: [ClassroomsController],
-  providers: [ClassroomsService],
+  providers: [ClassroomsService, Authenticator],
 })
 export class ClassroomsModule {}
