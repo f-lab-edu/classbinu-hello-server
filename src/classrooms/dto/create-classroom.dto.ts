@@ -1,27 +1,22 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateClassroomDto {
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   schoolYear: number;
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   grade: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   classSection: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  teacherId: number;
 
   @ApiProperty()
   @IsString()
