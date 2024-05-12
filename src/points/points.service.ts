@@ -1,5 +1,5 @@
 import { CreatePointDto } from './dto/create-point.dto';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Point } from './entities/point.entity';
 import { Repository } from 'typeorm';
@@ -10,7 +10,6 @@ export class PointsService {
   constructor(
     @InjectRepository(Point)
     private pointRepository: Repository<Point>,
-    @Inject(UsersService)
     private usersService: UsersService,
   ) {}
 

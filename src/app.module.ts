@@ -1,14 +1,17 @@
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ClassroomsModule } from './classrooms/classrooms.module';
 import { ConfigModule } from '@nestjs/config';
+import { CqrsModule } from '@nestjs/cqrs';
 import { DatabaseModule } from './database/database.module';
 import { Module } from '@nestjs/common';
+import { PointTransactionsModule } from './point-transactions/point-transactions.module';
+import { PointsModule } from './points/points.module';
 import { PostsModule } from './posts/posts.module';
 import { TopicsModule } from './topics/topics.module';
-import { ClassroomsModule } from './classrooms/classrooms.module';
-import { PointsModule } from './points/points.module';
-import { PointTransactionsModule } from './point-transactions/point-transactions.module';
+import { UserCreatedHandler } from './points/events/handler/user-created.handler';
+import { UsersModule } from './users/users.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -18,7 +21,9 @@ import configuration from './config/configuration';
       isGlobal: true,
     }),
     DatabaseModule,
+    CqrsModule,
     AuthModule,
+    UsersModule,
     PostsModule,
     TopicsModule,
     ClassroomsModule,
@@ -26,6 +31,6 @@ import configuration from './config/configuration';
     PointTransactionsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, UserCreatedHandler],
 })
 export class AppModule {}
