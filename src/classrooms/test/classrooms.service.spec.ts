@@ -1,7 +1,7 @@
+import { Classroom, MockAuthenticator } from '../entities/classroom.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { Classroom } from '../entities/classroom.entity';
 import { ClassroomStudent } from '../entities/classroom_student.entity';
 import { ClassroomsService } from '../classrooms.service';
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
@@ -41,6 +41,10 @@ describe('ClassroomsService', () => {
         {
           provide: 'ClassroomStudentRepository',
           useValue: mockClassroomStudentRepository,
+        },
+        {
+          provide: 'authenticator',
+          useValue: new MockAuthenticator(),
         },
       ],
     }).compile();
@@ -174,6 +178,8 @@ describe('ClassroomsService', () => {
     });
   });
 
+  // TODO: pin을 제외하고 테스트해야 함.
+  // TODO: pin으로 auth를 체크하는 건 또 다른 테스트에서 하는 것.
   describe('joinClassroom', () => {
     let joinClassroomDto: JoinClassroomDto;
 

@@ -8,6 +8,21 @@ import {
 
 import { CreateClassroomDto } from '../dto/create-classroom.dto';
 
+export class Authenticator {
+  authenticate: (classroom: Classroom, value: any) => boolean;
+}
+
+// 독립적인 파일이라고 생각
+export class PinAuthenticator implements Authenticator {
+  authenticate = (classroom: Classroom, value: string) => {
+    return classroom.pin.localeCompare(value) === 0;
+  };
+}
+
+export class MockAuthenticator implements Authenticator {
+  authenticate = () => true;
+}
+
 @Entity()
 export class Classroom {
   @PrimaryGeneratedColumn()
@@ -40,6 +55,11 @@ export class Classroom {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  // TODO: 찾아보기 ===
+  // checkAuthorization = (pin: string): boolean => {
+  //   return this.pin.localeCompare(pin) === 0;
+  // };
 
   constructor(createClassroomDto?: CreateClassroomDto) {
     if (createClassroomDto) {

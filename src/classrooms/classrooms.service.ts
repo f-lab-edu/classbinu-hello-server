@@ -1,16 +1,18 @@
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import {
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateClassroomDto } from './dto/update-classroom.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Classroom } from './entities/classroom.entity';
+import { Authenticator, Classroom } from './entities/classroom.entity';
 import { Repository } from 'typeorm';
 import { JoinClassroomDto } from './dto/join-classroom.dto';
 import { ClassroomStudent } from './entities/classroom_student.entity';
 import { UpdateClassroomStudentDto } from './dto/update-classroom-student.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ClassroomsService {
@@ -19,6 +21,10 @@ export class ClassroomsService {
     private classroomRepository: Repository<Classroom>,
     @InjectRepository(ClassroomStudent)
     private classroomStudentRepository: Repository<ClassroomStudent>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @Inject(Authenticator)
+    private authenticator: Authenticator,
   ) {}
 
   async create(createClassroomDto: CreateClassroomDto, userId: number) {
@@ -63,7 +69,6 @@ export class ClassroomsService {
     userId: number,
     joinClassroomDto: JoinClassroomDto,
   ) {
-    const pin = joinClassroomDto.pin;
     const classroom = await this.classroomRepository.findOneBy({ id });
     const user = await this.classroomStudentRepository.findOneBy({
       id: userId,
@@ -72,7 +77,7 @@ export class ClassroomsService {
     if (!classroom) {
       throw new NotFoundException(`Classroom with ID ${id} not found.`);
     }
-    if (classroom.pin !== pin) {
+    if (this.authenticator.authenticate(classroom, joinClassroomDto.pin)) {
       throw new UnauthorizedException('Invalid pin');
     }
 
@@ -96,16 +101,33 @@ export class ClassroomsService {
     studentId: number,
     updateDto: UpdateClassroomStudentDto,
   ) {
+    // const result = await this.classroomStudentRepository.update(
+    //   { classroom: { id }, student: { id: studentId } },
+    //   updateDto,
+    // );
+
+    // if (result.affected === 0) {
+    //   throw new NotFoundException(
+    //     `Classroom with ID ${id} or Student with ID ${studentId} not found.`,
+    //   );
+    // }
+
+    // return result;
+
+    const classroom = await this.classroomRepository.findOneBy({ id });
+    if (!classroom) {
+      throw new NotFoundException('학급을 찾을 수 없습니다.');
+    }
+
+    const student = await this.userRepository.findOneBy({ id: studentId });
+    if (!student) {
+      throw new NotFoundException('학생을 찾을 수 없습니다.');
+    }
+
     const result = await this.classroomStudentRepository.update(
       { classroom: { id }, student: { id: studentId } },
       updateDto,
     );
-
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `Classroom with ID ${id} or Student with ID ${studentId} not found.`,
-      );
-    }
 
     return result;
   }
