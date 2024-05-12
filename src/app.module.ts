@@ -8,6 +8,7 @@ import { PostsModule } from './posts/posts.module';
 import { TopicsModule } from './topics/topics.module';
 import { ClassroomsModule } from './classrooms/classrooms.module';
 import { PointsModule } from './points/points.module';
+import { PointTransactionsModule } from './point-transactions/point-transactions.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -22,6 +23,7 @@ import configuration from './config/configuration';
     TopicsModule,
     ClassroomsModule,
     PointsModule,
+    PointTransactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
