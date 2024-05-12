@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
 import { PostsModule } from './posts/posts.module';
 import { TopicsModule } from './topics/topics.module';
 import { ClassroomsModule } from './classrooms/classrooms.module';
+import { PointsModule } from './points/points.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -20,6 +21,7 @@ import configuration from './config/configuration';
     PostsModule,
     TopicsModule,
     ClassroomsModule,
+    PointsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
