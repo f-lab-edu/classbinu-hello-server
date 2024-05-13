@@ -1,4 +1,5 @@
 import { AppModule } from './app.module';
+import { DataSource } from 'typeorm';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
@@ -7,6 +8,8 @@ import { swaggerConfig } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const dataSource = app.get(DataSource);
+  const PORT = 3000;
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -15,9 +18,23 @@ async function bootstrap() {
   );
 
   const apiRoot = config().swaggerApi.apiRoot;
-  const documnet = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup(apiRoot, app, documnet);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(apiRoot, app, document);
 
-  await app.listen(3000);
+  await app.listen(PORT);
+  console.log(`✅ Application is running on: ${PORT} port`);
+
+  // Graceful shutdown
+  const shtudown = async () => {
+    console.log('⏳ Application is Graceful shutting down...');
+    await dataSource.destroy();
+    await app.close();
+    console.log('🔴 Application is shut down');
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', shtudown);
+  process.on('SIGINT', shtudown);
 }
+
 bootstrap();
