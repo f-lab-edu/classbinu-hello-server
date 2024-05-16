@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -13,13 +13,22 @@ export class UsersService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private eventBus: EventBus,
+    // DataSource는 Global로 주입되고 있습니다.
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create(createUserDto);
-    const user = await this.userRepository.save(newUser);
-    this.eventBus.publish(new UserCreatedEvent(user.id));
-    return user;
+    return await this.dataSource.transaction(async (manager) => {
+      try {
+        const newUser = this.userRepository.create(createUserDto);
+        const user = await manager.save(newUser);
+
+        this.eventBus.publish(new UserCreatedEvent(user.id));
+        return user;
+      } catch {
+        throw new Error('Failed to create user');
+      }
+    });
   }
 
   async findAll(): Promise<User[]> {
