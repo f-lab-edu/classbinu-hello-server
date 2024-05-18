@@ -69,14 +69,18 @@ describe('ClassroomsService', () => {
       const userId = 1;
 
       // TODO: 별도 인터페이스로 분리해야 하나?
-      const classroom = new Classroom(createClassroomDto);
-      classroom.teacherId = userId;
+      const mockClassroom = {
+        ...expectedClassroom,
+      };
+      jest.spyOn(Classroom, 'createFromDto').mockReturnValue(mockClassroom);
+
+      mockClassroom.teacherId = userId;
 
       mockClassroomRepository.save.mockResolvedValue(expectedClassroom);
 
       const result = await service.create(createClassroomDto, userId);
       expect(result).toEqual(expectedClassroom);
-      expect(mockClassroomRepository.save).toHaveBeenCalledWith(classroom);
+      expect(mockClassroomRepository.save).toHaveBeenCalledWith(mockClassroom);
     });
   });
 

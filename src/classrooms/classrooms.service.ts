@@ -28,7 +28,7 @@ export class ClassroomsService {
   ) {}
 
   async create(createClassroomDto: CreateClassroomDto, userId: number) {
-    const classroom = new Classroom(createClassroomDto);
+    const classroom = Classroom.createFromDto(createClassroomDto);
     classroom.teacherId = userId;
     return await this.classroomRepository.save(classroom);
   }
