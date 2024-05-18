@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -9,6 +10,7 @@ import {
 
 import { Point } from 'src/points/entities/point.entity';
 
+@Entity()
 export class PointTransaction {
   @PrimaryGeneratedColumn()
   id: number;
@@ -18,7 +20,10 @@ export class PointTransaction {
   point: Point;
 
   @Column()
-  type: string;
+  amount: number;
+
+  @Column({ nullable: true })
+  description?: string;
 
   @CreateDateColumn()
   createdAt: Date;
