@@ -61,14 +61,16 @@ export class Classroom {
   //   return this.pin.localeCompare(pin) === 0;
   // };
 
-  constructor(createClassroomDto?: CreateClassroomDto) {
-    if (createClassroomDto) {
-      this.schoolYear = createClassroomDto.schoolYear;
-      this.grade = createClassroomDto.grade;
-      this.classSection = createClassroomDto.classSection;
-      this.bio = createClassroomDto.bio;
-      this.pin = createClassroomDto.pin;
-      this.isActive = true;
-    }
+  static createFromDto(createClassroomDto: CreateClassroomDto): Classroom {
+    const classroom = new Classroom();
+    classroom.schoolYear = createClassroomDto.schoolYear;
+    classroom.grade = createClassroomDto.grade;
+    classroom.classSection = createClassroomDto.classSection;
+    classroom.bio = createClassroomDto.bio;
+    classroom.pin = createClassroomDto.pin;
+    classroom.isActive = true;
+    return classroom;
   }
+
+  constructor() {}
 }
