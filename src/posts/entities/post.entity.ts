@@ -2,17 +2,25 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { CreatePostDto } from '../dto/create-post.dto';
 import { PostStatus } from '../enums/posts.enum';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
+
+  // TODO: 양방향으로 변경
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column()
   userId: number;

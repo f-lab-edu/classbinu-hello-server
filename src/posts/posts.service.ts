@@ -5,17 +5,38 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { Post } from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PointsService } from 'src/points/points.service';
+import { Point } from 'src/points/entities/point.entity';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    private pointsService: PointsService,
   ) {}
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
-    const post = new Post(createPostDto);
-    return await this.postRepository.save(post);
+    return await this.postRepository.manager.transaction(async (manager) => {
+      const post = manager.create(Post, createPostDto);
+      await manager.save(post);
+
+      let point = await manager.findOne(Point, {
+        where: { user: post.user },
+      });
+
+      if (!point) {
+        point = manager.create(Point, {
+          user: post.user,
+          balance: 0,
+        });
+      }
+
+      point.adjustBalance(10);
+      await manager.save(point);
+
+      return post;
+    });
   }
 
   async findAll() {
