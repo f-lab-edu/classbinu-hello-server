@@ -4,11 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { CreatePostDto } from '../dto/create-post.dto';
+import { PostLike } from './post-like.entity';
 import { PostStatus } from '../enums/posts.enum';
 import { User } from 'src/users/entities/user.entity';
 
@@ -45,6 +47,9 @@ export class Post {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => PostLike, (postLike) => postLike.post)
+  postLikes: PostLike[];
 
   constructor(createPostDto?: CreatePostDto) {
     if (createPostDto) {
