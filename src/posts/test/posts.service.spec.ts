@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { CreatePostDto } from '../dto/create-post.dto';
 import { Post } from '../entities/post.entity';
-import { PostsService } from '../posts.service';
+import { PostsService } from '../services/posts.service';
 import { Repository } from 'typeorm';
 
 describe('PostsService', () => {

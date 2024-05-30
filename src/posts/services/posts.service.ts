@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { CreatePostDto } from './dto/create-post.dto';
-import { Post } from './entities/post.entity';
+import { CreatePostDto } from '../dto/create-post.dto';
+import { Post } from '../entities/post.entity';
 import { Repository } from 'typeorm';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { PointsService } from 'src/points/points.service';
+import { UpdatePostDto } from '../dto/update-post.dto';
 import { Point } from 'src/points/entities/point.entity';
 
 @Injectable()
@@ -13,7 +12,6 @@ export class PostsService {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
-    private pointsService: PointsService,
   ) {}
 
   async create(createPostDto: CreatePostDto): Promise<Post> {

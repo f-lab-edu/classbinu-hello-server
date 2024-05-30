@@ -8,13 +8,13 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { PostsService } from '../services/posts.service';
+import { CreatePostDto } from '../dto/create-post.dto';
+import { UpdatePostDto } from '../dto/update-post.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { PostOwnerGuard } from './guards/post-owner.guard';
-import { User } from '../common/decorators/user.decorator';
+import { PostOwnerGuard } from '../guards/post-owner.guard';
+import { User } from '../../common/decorators/user.decorator';
 
 @ApiTags('posts')
 @Controller('posts')

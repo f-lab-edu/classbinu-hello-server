@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { Post } from '../entities/post.entity';
 import { PostOwnerGuard } from '../guards/post-owner.guard';
-import { PostsController } from '../posts.controller';
-import { PostsService } from '../posts.service';
+import { PostsController } from '../controllers/posts.controller';
+import { PostsService } from '../services/posts.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
