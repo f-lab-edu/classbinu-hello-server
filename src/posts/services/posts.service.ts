@@ -37,7 +37,15 @@ export class PostsService {
     });
   }
 
-  async findAll() {
+  async findAll(q?: string) {
+    if (q) {
+      const query = `
+        SELECT * FROM posts 
+        WHERE title LIKE $1
+        OR content LIKE $1;
+      `;
+      return await this.postRepository.query(query, [`%${q}%`]);
+    }
     return await this.postRepository.find();
   }
 

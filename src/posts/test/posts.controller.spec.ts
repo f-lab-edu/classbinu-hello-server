@@ -71,6 +71,11 @@ describe('PostsController', () => {
     expect(mockPostsService.findAll).toHaveBeenCalled();
   });
 
+  it('검색어가 있을 때 만족하는 검색 결과를 반환한다.', async () => {
+    expect(await controller.findAll('title')).toEqual([{ id: 1 }]);
+    expect(mockPostsService.findAll).toHaveBeenCalledWith('title');
+  });
+
   it('should find one post', async () => {
     expect(await controller.findOne(1)).toEqual({ id: 1 });
     expect(mockPostsService.findOne).toHaveBeenCalledWith(1);
