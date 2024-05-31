@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from '../services/posts.service';
 import { CreatePostDto } from '../dto/create-post.dto';
@@ -33,8 +34,8 @@ export class PostsController {
   }
 
   @Get()
-  async findAll() {
-    return await this.postsService.findAll();
+  async findAll(@Query('q') q?: string) {
+    return await this.postsService.findAll(q);
   }
 
   @Get(':id')
