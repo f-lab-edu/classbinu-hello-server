@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 # . 또는 ./ 은 WORKDIR을 의미
 COPY package*.json .
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
