@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreatePostDto } from '../dto/create-post.dto';
@@ -13,6 +13,11 @@ export class PostsService {
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
   ) {}
+
+  private static readonly POINT_REWARD = 10;
+  public getPointReward(): number {
+    return PostsService.POINT_REWARD;
+  }
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
     return await this.postRepository.manager.transaction(async (manager) => {
@@ -30,7 +35,7 @@ export class PostsService {
         });
       }
 
-      point.adjustBalance(10);
+      point.adjustBalance(PostsService.POINT_REWARD);
       await manager.save(point);
 
       return post;
@@ -62,6 +67,26 @@ export class PostsService {
   }
 
   async remove(id: number) {
-    return await this.postRepository.delete(id);
+    return await this.postRepository.manager.transaction(async (manager) => {
+      const post = await manager.findOneBy(Post, { id });
+
+      if (!post) {
+        throw new NotFoundException(`Post with id ${id} not found`);
+      }
+      await manager.remove(post);
+
+      const point = await manager.findOne(Point, {
+        where: { user: post.user },
+      });
+
+      if (!point) {
+        throw new NotFoundException(
+          `Point for user with id ${post.user.id} not found`,
+        );
+      }
+
+      point.adjustBalance(-PostsService.POINT_REWARD);
+      await manager.save(point);
+    });
   }
 }
