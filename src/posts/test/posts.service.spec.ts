@@ -29,7 +29,7 @@ describe('PostsService', () => {
       delete: jest.fn().mockResolvedValue({ id: 1 }),
       query: jest.fn(),
       manager: {
-        transaction: jest.fn().mockImplementation((cb) => cb(mockManager)), // 올바른 위치
+        transaction: jest.fn().mockImplementation((cb) => cb(mockManager)),
       },
     } as any;
 
