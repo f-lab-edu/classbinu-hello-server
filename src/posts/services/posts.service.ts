@@ -6,18 +6,15 @@ import { Post } from '../entities/post.entity';
 import { Repository } from 'typeorm';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { Point } from 'src/points/entities/point.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    private configService: ConfigService,
   ) {}
-
-  private static readonly POINT_REWARD = 10;
-  public getPointReward(): number {
-    return PostsService.POINT_REWARD;
-  }
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
     return await this.postRepository.manager.transaction(async (manager) => {
@@ -35,7 +32,7 @@ export class PostsService {
         });
       }
 
-      point.adjustBalance(PostsService.POINT_REWARD);
+      point.adjustBalance(this.configService.get('points.reward'));
       await manager.save(point);
 
       return post;
@@ -85,7 +82,7 @@ export class PostsService {
         );
       }
 
-      point.adjustBalance(-PostsService.POINT_REWARD);
+      point.adjustBalance(-this.configService.get('points.reward'));
       await manager.save(point);
     });
   }

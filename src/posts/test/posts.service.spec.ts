@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ConfigService } from '@nestjs/config';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { NotFoundException } from '@nestjs/common';
 import { Point } from 'src/points/entities/point.entity';
@@ -10,7 +11,8 @@ import { Repository } from 'typeorm';
 describe('PostsService', () => {
   let service: PostsService;
   let mockPostRepository: jest.Mocked<Repository<Post>>;
-  let mockManager;
+  let mockManager: jest.Mocked<any>;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     mockManager = {
@@ -40,10 +42,22 @@ describe('PostsService', () => {
           provide: 'PostRepository',
           useValue: mockPostRepository,
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key) => {
+              if (key === 'points.reward') {
+                return 10;
+              }
+              return null;
+            }),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<PostsService>(PostsService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
@@ -103,7 +117,7 @@ describe('PostsService', () => {
     const postId = 1;
     const mockPost = { id: 1, title: 'Test Post', user: { id: 2 } };
     const mockPoint = { adjustBalance: jest.fn(), user: { id: 2 } };
-    const pointReward = service.getPointReward();
+    const pointReward = configService.get('points.reward');
 
     mockManager.findOneBy.mockResolvedValue(mockPost);
     mockManager.findOne.mockResolvedValue(mockPoint);
