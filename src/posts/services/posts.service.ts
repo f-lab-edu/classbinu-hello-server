@@ -10,11 +10,15 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PostsService {
+  private readonly pointsReward: number;
+
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
     private configService: ConfigService,
-  ) {}
+  ) {
+    this.pointsReward = this.configService.get('points.reward');
+  }
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
     return await this.postRepository.manager.transaction(async (manager) => {
@@ -32,7 +36,7 @@ export class PostsService {
         });
       }
 
-      point.adjustBalance(this.configService.get('points.reward'));
+      point.adjustBalance(this.pointsReward);
       await manager.save(point);
 
       return post;
