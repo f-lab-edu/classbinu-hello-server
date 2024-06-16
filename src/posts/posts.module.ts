@@ -1,3 +1,4 @@
+import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { PointsModule } from 'src/points/points.module';
 import { Post } from './entities/post.entity';
@@ -7,9 +8,14 @@ import { PostsLikeController } from './controllers/posts-like.controllers';
 import { PostsLikeService } from './services/posts-like.service';
 import { PostsService } from './services/posts.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import postsConfig from './config/posts.config';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, PostLike]), PointsModule],
+  imports: [
+    ConfigModule.forFeature(postsConfig),
+    TypeOrmModule.forFeature([Post, PostLike]),
+    PointsModule,
+  ],
   controllers: [PostsController, PostsLikeController],
   providers: [PostsService, PostsLikeService],
 })

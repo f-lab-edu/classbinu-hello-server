@@ -19,7 +19,4 @@ export default () => ({
     accessExpiresIn: process.env.ACCESS_EXPIRES_IN,
     refreshExpiresIn: process.env.REFRESH_EXPIRES_IN,
   },
-  points: {
-    reward: 10,
-  },
 });
