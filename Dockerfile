@@ -14,9 +14,3 @@ RUN npm run build
 EXPOSE 3000
 
 CMD ["node", "dist/main"]
-
-# 이미지 빌드
-# docker build -t hello .
-
-# 컨테이너 실행
-# docker run -p 3000:3000 hello

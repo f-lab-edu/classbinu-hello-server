@@ -16,5 +16,7 @@ export default () => ({
   jwt: {
     accessSecret: process.env.ACCESS_SECRET,
     refreshSecret: process.env.REFRESH_SECRET,
+    accessExpiresIn: process.env.ACCESS_EXPIRES_IN,
+    refreshExpiresIn: process.env.REFRESH_EXPIRES_IN,
   },
 });

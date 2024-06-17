@@ -8,10 +8,20 @@ export interface TokenStrategy {
 
 @Injectable()
 abstract class BaseTokenStrategy implements TokenStrategy {
+  private readonly accessSecret: string;
+  private readonly refreshSecret: string;
+  private readonly accessExpiresIn: string;
+  private readonly refreshExpiresIn: string;
+
   constructor(
     protected jwtService: JwtService,
     protected configService: ConfigService,
-  ) {}
+  ) {
+    this.accessSecret = this.configService.get('jwt.accessSecret');
+    this.refreshSecret = this.configService.get('jwt.refreshSecret');
+    this.accessExpiresIn = this.configService.get('jwt.accessExpiresIn');
+    this.refreshExpiresIn = this.configService.get('jwt.refreshExpiresIn');
+  }
 
   async createTokens(userId: number, username: string) {
     const accessToken = await this.jwtService.signAsync(
@@ -20,8 +30,8 @@ abstract class BaseTokenStrategy implements TokenStrategy {
         username,
       },
       {
-        secret: this.configService.get('jwt.accessSecret'),
-        expiresIn: '15m',
+        secret: this.accessSecret,
+        expiresIn: this.accessExpiresIn,
       },
     );
 
@@ -31,7 +41,7 @@ abstract class BaseTokenStrategy implements TokenStrategy {
         username,
       },
       {
-        secret: this.configService.get('jwt.refreshSecret'),
+        secret: this.refreshSecret,
         expiresIn: this.getRefreshTokenExpiresIn(),
       },
     );

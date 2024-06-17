@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ConfigService } from '@nestjs/config';
 import { CreatePostDto } from '../dto/create-post.dto';
+import { NotFoundException } from '@nestjs/common';
+import { Point } from 'src/points/entities/point.entity';
 import { Post } from '../entities/post.entity';
 import { PostsService } from '../services/posts.service';
 import { Repository } from 'typeorm';
@@ -8,8 +11,17 @@ import { Repository } from 'typeorm';
 describe('PostsService', () => {
   let service: PostsService;
   let mockPostRepository: jest.Mocked<Repository<Post>>;
+  let mockManager: jest.Mocked<any>;
+  let configService: ConfigService;
 
   beforeEach(async () => {
+    mockManager = {
+      findOneBy: jest.fn(),
+      remove: jest.fn(),
+      save: jest.fn(),
+      findOne: jest.fn(),
+    };
+
     mockPostRepository = {
       save: jest.fn().mockResolvedValue({ id: 1 }),
       find: jest.fn().mockResolvedValue([{ id: 1 }]),
@@ -18,6 +30,9 @@ describe('PostsService', () => {
       increment: jest.fn().mockResolvedValue({ id: 1 }),
       delete: jest.fn().mockResolvedValue({ id: 1 }),
       query: jest.fn(),
+      manager: {
+        transaction: jest.fn().mockImplementation((cb) => cb(mockManager)),
+      },
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -27,10 +42,22 @@ describe('PostsService', () => {
           provide: 'PostRepository',
           useValue: mockPostRepository,
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key) => {
+              if (key === 'points.reward') {
+                return 10;
+              }
+              return null;
+            }),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<PostsService>(PostsService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
@@ -87,7 +114,24 @@ describe('PostsService', () => {
   });
 
   it('should remove a post', async () => {
-    expect(await service.remove(1)).toEqual({ id: 1 });
-    expect(mockPostRepository.delete).toHaveBeenCalledWith(1);
+    const postId = 1;
+    const mockPost = { id: 1, title: 'Test Post', user: { id: 2 } };
+    const mockPoint = { adjustBalance: jest.fn(), user: { id: 2 } };
+    const pointReward = configService.get('points.reward');
+
+    mockManager.findOneBy.mockResolvedValue(mockPost);
+    mockManager.findOne.mockResolvedValue(mockPoint);
+    mockManager.remove.mockResolvedValue(undefined);
+    mockManager.save.mockResolvedValue(undefined);
+
+    await service.remove(postId);
+
+    expect(mockManager.findOneBy).toHaveBeenCalledWith(Post, { id: postId });
+    expect(mockManager.remove).toHaveBeenCalledWith(mockPost);
+    expect(mockManager.findOne).toHaveBeenCalledWith(Point, {
+      where: { user: mockPost.user },
+    });
+    expect(mockPoint.adjustBalance).toHaveBeenCalledWith(-pointReward);
+    expect(mockManager.save).toHaveBeenCalledWith(mockPoint);
   });
 });
