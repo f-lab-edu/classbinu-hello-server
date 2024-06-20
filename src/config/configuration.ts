@@ -7,6 +7,13 @@ export default () => ({
     name: process.env.DB_NAME,
     port: parseInt(process.env.DB_PORT) || 5432,
   },
+  slaveDb: {
+    host: process.env.SLAVE_DB_HOST,
+    username: process.env.SLAVE_DB_USERNAME,
+    password: process.env.SLAVE_DB_PASSWORD,
+    name: process.env.SLAVE_DB_NAME,
+    port: parseInt(process.env.SLAVE_DB_PORT) || 5433,
+  },
   swaggerApi: {
     title: '오늘의 일기 API',
     description: '오늘의 일기 API Description',

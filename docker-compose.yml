@@ -1,0 +1,57 @@
+services:
+  master:
+    image: postgres:14-alpine
+    container_name: postgres_master
+    environment:
+      POSTGRES_USER: masteruser
+      POSTGRES_PASSWORD: masterpassword
+      POSTGRES_DB: masterdb
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./master_data:/var/lib/postgresql/data
+    restart: always
+    command: >
+      postgres 
+      -c wal_level=replica 
+      -c max_wal_senders=10 
+      -c max_replication_slots=10 
+      -c listen_addresses='*'
+
+  slave:
+    image: postgres:14-alpine
+    container_name: postgres_slave
+    environment:
+      POSTGRES_USER: slaveuser
+      POSTGRES_PASSWORD: slavepassword
+      POSTGRES_DB: slavedb
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./slave_data:/var/lib/postgresql/data
+    depends_on:
+      - master
+    restart: always
+    command: >
+      bash -c "
+      if [ -z \"$(ls -A /var/lib/postgresql/data)\" ]; then
+        echo 'Data directory is clean, ready for base backup...';
+      else
+        echo 'Cleaning data directory...';
+        rm -rf /var/lib/postgresql/data/*;
+      fi;
+      chown -R postgres:postgres /var/lib/postgresql/data && \
+      chmod 700 /var/lib/postgresql/data && \
+      export PGPASSWORD=masterpassword;
+      until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=master --port=5432 --username=masteruser; do 
+        sleep 1s; 
+      done;
+      echo 'Backup completed, starting PostgreSQL...';
+      touch /var/lib/postgresql/data/standby.signal;
+      exec postgres 
+        -c hot_standby=on 
+        -c hot_standby_feedback=on 
+        -c listen_addresses='*' 
+        -c primary_conninfo='host=master port=5432 user=masteruser password=masterpassword sslmode=prefer sslcompression=1'
+      "
+    user: postgres
