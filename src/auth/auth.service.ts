@@ -66,6 +66,7 @@ export class AuthService {
       throw new NotFoundException('Code not found');
     }
     await this.usersService.update(+userId, { isActive: true });
+    await this.redisService.del(code);
     return { message: 'Email verified successfully' };
   }
 
