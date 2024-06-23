@@ -56,12 +56,7 @@ export class AuthService {
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
 
     const code = randomCodeGenerator();
-    const redisResult = await this.redisService.set(
-      code,
-      newUser.id.toString(),
-      60 * 10,
-    );
-    console.log(redisResult);
+    await this.redisService.set(code, newUser.id.toString(), 60 * 10);
     return tokens;
   }
 
