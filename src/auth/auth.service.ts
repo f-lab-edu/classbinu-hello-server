@@ -12,11 +12,14 @@ import { AuthDto } from './dtos/auth.dto';
 import { CreateUserDto } from '../users/dtos/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { TokenStrategy } from './strategies/token.strategy';
+import { RedisService } from 'src/redis/redis.service';
+import { randomCodeGenerator } from './utils/random-code-generator';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private redisService: RedisService,
     @Inject('TokenStrategy') private tokenStrategy: TokenStrategy,
   ) {}
 
@@ -51,7 +54,24 @@ export class AuthService {
       newUser.username,
     );
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
+
+    const code = randomCodeGenerator();
+    const redisResult = await this.redisService.set(
+      code,
+      newUser.id.toString(),
+      60 * 10,
+    );
+    console.log(redisResult);
     return tokens;
+  }
+
+  async verifyEmail(code: string) {
+    const userId = await this.redisService.get(code);
+    if (!userId) {
+      throw new NotFoundException('Code not found');
+    }
+    await this.usersService.update(+userId, { isActive: true });
+    return { message: 'Email verified successfully' };
   }
 
   async login(authDto: AuthDto) {

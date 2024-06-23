@@ -9,6 +9,7 @@ import { Module } from '@nestjs/common';
 import { PointTransactionsModule } from './point-transactions/point-transactions.module';
 import { PointsModule } from './points/points.module';
 import { PostsModule } from './posts/posts.module';
+import { RedisModule } from './redis/redis.module';
 import { TopicsModule } from './topics/topics.module';
 import { UserCreatedHandler } from './points/events/handler/user-created.handler';
 import { UsersModule } from './users/users.module';
@@ -29,6 +30,7 @@ import configuration from './config/configuration';
     ClassroomsModule,
     PointsModule,
     PointTransactionsModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserCreatedHandler],

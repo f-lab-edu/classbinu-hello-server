@@ -9,11 +9,12 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
+import { RedisModule } from 'src/redis/redis.module';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [UsersModule, PassportModule, JwtModule.register({})],
+  imports: [UsersModule, PassportModule, RedisModule, JwtModule.register({})],
   providers: [
     AuthService,
     AccessTokenStrategy,
