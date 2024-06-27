@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { ConfigService } from '@nestjs/config';
 import { CreatePostDto } from '../dto/create-post.dto';
-import { NotFoundException } from '@nestjs/common';
 import { Point } from 'src/points/entities/point.entity';
 import { Post } from '../entities/post.entity';
 import { PostsService } from '../services/posts.service';
