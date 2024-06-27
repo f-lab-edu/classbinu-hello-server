@@ -7,7 +7,7 @@ export class RedisService {
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
   async set(key: string, value: any, ttl: number = 600) {
-    await this.redis.set(key, value, 'EX', ttl);
+    return await this.redis.set(key, value, 'EX', ttl);
   }
 
   async get(key: string) {
@@ -15,6 +15,6 @@ export class RedisService {
   }
 
   async del(key: string) {
-    await this.redis.del(key);
+    return await this.redis.del(key);
   }
 }
