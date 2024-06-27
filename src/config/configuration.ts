@@ -26,4 +26,9 @@ export default () => ({
     accessExpiresIn: process.env.ACCESS_EXPIRES_IN,
     refreshExpiresIn: process.env.REFRESH_EXPIRES_IN,
   },
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT) || 16681,
+    password: process.env.REDIS_PASSWORD,
+  },
 });

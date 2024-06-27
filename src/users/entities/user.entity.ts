@@ -29,7 +29,7 @@ export class User {
   @Column({ default: null })
   refreshToken: string;
 
-  @Column({ default: true })
+  @Column({ default: false })
   isActive: boolean;
 
   @CreateDateColumn()
