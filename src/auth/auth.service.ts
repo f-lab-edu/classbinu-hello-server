@@ -56,7 +56,16 @@ export class AuthService {
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
 
     const code = randomCodeGenerator();
-    await this.redisService.set(code, newUser.id.toString(), 60 * 10);
+    const setResult = await this.redisService.set(
+      code,
+      newUser.id.toString(),
+      60 * 10,
+    );
+
+    if (setResult !== 'OK') {
+      throw new Error('Failed to save code in Redis');
+    }
+
     return tokens;
   }
 
@@ -66,7 +75,10 @@ export class AuthService {
       throw new NotFoundException('Code not found');
     }
     await this.usersService.update(+userId, { isActive: true });
-    await this.redisService.del(code);
+    const delResult = await this.redisService.del(code);
+    if (delResult === 0) {
+      throw new Error('Failed to delete code from Redis');
+    }
     return { message: 'Email verified successfully' };
   }
 
