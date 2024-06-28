@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { ConfigService } from '@nestjs/config';
 import { CreatePostDto } from '../dto/create-post.dto';
+import { NotFoundException } from '@nestjs/common';
 import { Point } from 'src/points/entities/point.entity';
 import { Post } from '../entities/post.entity';
 import { PostsService } from '../services/posts.service';
@@ -11,14 +12,16 @@ describe('PostsService', () => {
   let service: PostsService;
   let mockPostRepository: jest.Mocked<Repository<Post>>;
   let mockManager: jest.Mocked<any>;
-  let configService: ConfigService;
+  let mockConfigService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
     mockManager = {
       findOneBy: jest.fn(),
+      findPostById: jest.fn(),
       remove: jest.fn(),
       save: jest.fn(),
       findOne: jest.fn(),
+      create: jest.fn(),
     };
 
     mockPostRepository = {
@@ -31,7 +34,20 @@ describe('PostsService', () => {
       query: jest.fn(),
       manager: {
         transaction: jest.fn().mockImplementation((cb) => cb(mockManager)),
+        findOneBy: jest.fn().mockResolvedValue({ id: 1 }),
+        findOne: jest.fn().mockResolvedValue({ id: 1 }),
+        remove: jest.fn(),
+        save: jest.fn(),
       },
+    } as any;
+
+    mockConfigService = {
+      get: jest.fn((key) => {
+        if (key === 'points.reward') {
+          return 10;
+        }
+        return null;
+      }),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -56,7 +72,6 @@ describe('PostsService', () => {
     }).compile();
 
     service = module.get<PostsService>(PostsService);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
@@ -112,25 +127,65 @@ describe('PostsService', () => {
     );
   });
 
-  it('should remove a post', async () => {
+  it('포스트를 성공적으로 삭제해야 한다.', async () => {
     const postId = 1;
-    const mockPost = { id: 1, title: 'Test Post', user: { id: 2 } };
-    const mockPoint = { adjustBalance: jest.fn(), user: { id: 2 } };
-    const pointReward = configService.get('points.reward');
+    const mockPost = { id: 1, title: 'Test Post', user: { id: 1 } };
 
-    mockManager.findOneBy.mockResolvedValue(mockPost);
-    mockManager.findOne.mockResolvedValue(mockPoint);
-    mockManager.remove.mockResolvedValue(undefined);
-    mockManager.save.mockResolvedValue(undefined);
+    jest.spyOn(service, 'findPostById').mockResolvedValue(mockPost);
+    jest.spyOn(service, 'removePost').mockResolvedValue(null);
+    jest.spyOn(service, 'adjustPoint').mockResolvedValue(null);
 
     await service.remove(postId);
 
-    expect(mockManager.findOneBy).toHaveBeenCalledWith(Post, { id: postId });
+    expect(mockPostRepository.manager.transaction).toHaveBeenCalled();
+    expect(service.findPostById).toHaveBeenCalledWith(mockManager, postId);
+    expect(service.removePost).toHaveBeenCalledWith(mockManager, mockPost);
+    expect(service.adjustPoint).toHaveBeenCalledWith(
+      mockManager,
+      mockPost.user,
+    );
+  });
+
+  it('포스트를 찾을 수 없을 때 에러를 반환한다.', async () => {
+    const postId = 1;
+    jest
+      .spyOn(service, 'findPostById')
+      .mockRejectedValue(
+        new NotFoundException(`Post with id ${postId} not found`),
+      );
+
+    await expect(service.remove(postId)).rejects.toThrow(
+      `Post with id ${postId} not found`,
+    );
+  });
+
+  it('removePost 메서드가 성공적으로 호출되어야 한다.', async () => {
+    const mockPost = { id: 1, title: 'Test Post' };
+    await service.removePost(mockManager, mockPost);
     expect(mockManager.remove).toHaveBeenCalledWith(mockPost);
+  });
+
+  it('adjustPoint 메서드가 성공적으로 호출되어야 한다.', async () => {
+    const mockUser = { id: 1 };
+    const mockPoint = {
+      id: 1,
+      user: mockUser,
+      balance: 100,
+      adjustBalance: jest.fn((reward) => (mockPoint.balance += reward)),
+    };
+    mockManager.findOne.mockResolvedValue(mockPoint);
+
+    mockManager.findOne.mockResolvedValue(mockPoint);
+
+    await service.adjustPoint(mockManager, mockUser);
+
     expect(mockManager.findOne).toHaveBeenCalledWith(Point, {
-      where: { user: mockPost.user },
+      where: { user: mockUser },
     });
-    expect(mockPoint.adjustBalance).toHaveBeenCalledWith(-pointReward);
+
+    expect(mockPoint.adjustBalance).toHaveBeenCalledWith(
+      mockConfigService.get('points.reward') * -1,
+    );
     expect(mockManager.save).toHaveBeenCalledWith(mockPoint);
   });
 });
