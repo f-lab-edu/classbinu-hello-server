@@ -69,25 +69,37 @@ export class PostsService {
 
   async remove(id: number) {
     return await this.postRepository.manager.transaction(async (manager) => {
-      const post = await manager.findOneBy(Post, { id });
-
-      if (!post) {
-        throw new NotFoundException(`Post with id ${id} not found`);
-      }
-      await manager.remove(post);
-
-      const point = await manager.findOne(Point, {
-        where: { user: post.user },
-      });
-
-      if (!point) {
-        throw new NotFoundException(
-          `Point for user with id ${post.user.id} not found`,
-        );
-      }
-
-      point.adjustBalance(-this.configService.get('points.reward'));
-      await manager.save(point);
+      const post = await this.findPostById(manager, id);
+      await this.removePost(manager, post);
+      await this.adjustPoint(manager, post.user);
     });
+  }
+
+  // 기존 remove 메서드를 분리한 메서드
+  async findPostById(manager, id) {
+    const post = await manager.findOneBy(Post, { id });
+    if (!post) {
+      throw new NotFoundException(`Post with id ${id} not found`);
+    }
+    return post;
+  }
+
+  // 기존 remove 메서드를 분리한 메서드
+  async removePost(manager, post) {
+    await manager.remove(post);
+  }
+
+  // 기존 remove 메서드를 분리한 메서드
+  async adjustPoint(manager, user) {
+    const point = await manager.findOne(Point, {
+      where: { user },
+    });
+
+    if (!point) {
+      throw new NotFoundException(`Point for user ${user.id} not found`);
+    }
+
+    point.adjustBalance(-this.configService.get('points.reward'));
+    await manager.save(point);
   }
 }

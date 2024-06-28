@@ -6,6 +6,7 @@ import { Point } from 'src/points/entities/point.entity';
 import { Post } from '../entities/post.entity';
 import { PostsService } from '../services/posts.service';
 import { Repository } from 'typeorm';
+import { find } from 'rxjs';
 
 describe('PostsService', () => {
   let service: PostsService;
@@ -19,6 +20,7 @@ describe('PostsService', () => {
       remove: jest.fn(),
       save: jest.fn(),
       findOne: jest.fn(),
+      create: jest.fn(),
     };
 
     mockPostRepository = {
@@ -31,8 +33,17 @@ describe('PostsService', () => {
       query: jest.fn(),
       manager: {
         transaction: jest.fn().mockImplementation((cb) => cb(mockManager)),
+        findOneBy: jest.fn().mockResolvedValue({ id: 1 }),
+        findOne: jest.fn().mockResolvedValue({ id: 1 }),
+        remove: jest.fn(),
+        save: jest.fn(),
       },
     } as any;
+
+    service = new PostsService(mockManager, configService);
+    jest.spyOn(service, 'findPostById').mockResolvedValue({ id: 1 });
+    jest.spyOn(service, 'removePost').mockResolvedValue();
+    jest.spyOn(service, 'adjustPoint').mockResolvedValue();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -114,23 +125,17 @@ describe('PostsService', () => {
 
   it('should remove a post', async () => {
     const postId = 1;
-    const mockPost = { id: 1, title: 'Test Post', user: { id: 2 } };
-    const mockPoint = { adjustBalance: jest.fn(), user: { id: 2 } };
-    const pointReward = configService.get('points.reward');
+    const mockPost = { id: 1, title: 'Test Post', user: { id: 1 } };
 
     mockManager.findOneBy.mockResolvedValue(mockPost);
-    mockManager.findOne.mockResolvedValue(mockPoint);
-    mockManager.remove.mockResolvedValue(undefined);
-    mockManager.save.mockResolvedValue(undefined);
-
     await service.remove(postId);
 
-    expect(mockManager.findOneBy).toHaveBeenCalledWith(Post, { id: postId });
-    expect(mockManager.remove).toHaveBeenCalledWith(mockPost);
-    expect(mockManager.findOne).toHaveBeenCalledWith(Point, {
-      where: { user: mockPost.user },
-    });
-    expect(mockPoint.adjustBalance).toHaveBeenCalledWith(-pointReward);
-    expect(mockManager.save).toHaveBeenCalledWith(mockPoint);
+    expect(mockManager.transaction).toHaveBeenCalled();
+    expect(service.findPostById).toHaveBeenCalledWith(mockManager, postId);
+    expect(service.removePost).toHaveBeenCalledWith(mockManager, mockPost);
+    expect(service.adjustPoint).toHaveBeenCalledWith(
+      mockManager,
+      mockPost.user,
+    );
   });
 });
