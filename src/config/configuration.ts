@@ -30,8 +30,7 @@ export default () => ({
     host: process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT) || 16681,
     password: process.env.REDIS_PASSWORD,
-    base_interval: 50,
-    max_interval: 2000,
-    max_attempts: 10,
+    maxRetriesPerRequest: 10,
+    maxLoadingRetryTime: 5000,
   },
 });
