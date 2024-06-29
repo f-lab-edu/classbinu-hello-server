@@ -38,7 +38,7 @@ services:
         echo 'Data directory is clean, ready for base backup...';
       else
         echo 'Cleaning data directory...';
-        rm -rf /var/lib/postgresql/data/*;
+        find /var/lib/postgresql/data -mindepth 1 -delete;
       fi;
       chown -R postgres:postgres /var/lib/postgresql/data && \
       chmod 700 /var/lib/postgresql/data && \

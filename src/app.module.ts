@@ -13,6 +13,7 @@ import { RedisModule } from './redis/redis.module';
 import { TopicsModule } from './topics/topics.module';
 import { UserCreatedHandler } from './points/events/handler/user-created.handler';
 import { UsersModule } from './users/users.module';
+import { MailModule } from './mail/mail.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -31,6 +32,7 @@ import configuration from './config/configuration';
     PointsModule,
     PointTransactionsModule,
     RedisModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserCreatedHandler],
