@@ -7,6 +7,8 @@ import { PostsController } from './controllers/posts.controller';
 import { PostsLikeController } from './controllers/posts-like.controllers';
 import { PostsLikeService } from './services/posts-like.service';
 import { PostsService } from './services/posts.service';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import { RedisService } from 'src/redis/redis.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import postsConfig from './config/posts.config';
 
@@ -15,8 +17,9 @@ import postsConfig from './config/posts.config';
     ConfigModule.forFeature(postsConfig),
     TypeOrmModule.forFeature([Post, PostLike]),
     PointsModule,
+    RedisModule,
   ],
   controllers: [PostsController, PostsLikeController],
-  providers: [PostsService, PostsLikeService],
+  providers: [PostsService, PostsLikeService, RedisService],
 })
 export class PostsModule {}

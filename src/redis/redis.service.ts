@@ -17,4 +17,8 @@ export class RedisService {
   async del(key: string) {
     return await this.redis.del(key);
   }
+
+  async incr(key: string) {
+    return await this.redis.incr(key);
+  }
 }

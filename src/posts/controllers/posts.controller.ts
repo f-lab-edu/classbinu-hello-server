@@ -52,7 +52,7 @@ export class PostsController {
 
   @Patch(':id/views')
   async incrementViews(@Param('id') id: number) {
-    return await this.postsService.incrementViews(+id);
+    return await this.postsService.incrementViewsCached(+id);
   }
 
   @Delete(':id')

@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { Point } from 'src/points/entities/point.entity';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class PostsService {
@@ -16,6 +17,7 @@ export class PostsService {
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
     private configService: ConfigService,
+    private redisService: RedisService,
   ) {
     this.pointsReward = this.configService.get('points.reward');
   }
@@ -65,6 +67,21 @@ export class PostsService {
 
   async incrementViews(id: number) {
     return await this.postRepository.increment({ id }, 'views', 1);
+  }
+
+  async incrementViewsCached(id: number) {
+    const COUNT_UNIT = 7;
+    const post = await this.postRepository.findOneBy({ id });
+
+    if (!post) {
+      throw new NotFoundException(`Post with id ${id} not found`);
+    }
+
+    const newViewCount = await this.redisService.incr(`posts:${id}:views`);
+    if (newViewCount % COUNT_UNIT === 0) {
+      await this.postRepository.increment({ id }, 'views', newViewCount);
+      await this.redisService.set(`posts:${id}:views`, 0);
+    }
   }
 
   async remove(id: number) {
