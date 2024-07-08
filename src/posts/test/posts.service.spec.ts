@@ -6,6 +6,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Point } from 'src/points/entities/point.entity';
 import { Post } from '../entities/post.entity';
 import { PostsService } from '../services/posts.service';
+import { RedisService } from 'src/redis/redis.service';
 import { Repository } from 'typeorm';
 
 describe('PostsService', () => {
@@ -13,6 +14,7 @@ describe('PostsService', () => {
   let mockPostRepository: jest.Mocked<Repository<Post>>;
   let mockManager: jest.Mocked<any>;
   let mockConfigService: jest.Mocked<ConfigService>;
+  let mockRedisService: jest.Mocked<RedisService>;
 
   beforeEach(async () => {
     mockManager = {
@@ -50,6 +52,11 @@ describe('PostsService', () => {
       }),
     } as any;
 
+    mockRedisService = {
+      set: jest.fn(),
+      incr: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PostsService,
@@ -67,6 +74,10 @@ describe('PostsService', () => {
               return null;
             }),
           },
+        },
+        {
+          provide: RedisService,
+          useValue: mockRedisService,
         },
       ],
     }).compile();
@@ -124,6 +135,51 @@ describe('PostsService', () => {
       { id: 1 },
       'views',
       1,
+    );
+  });
+
+  it('포스트의 캐싱된 조회 수가 7의 배수이면 DB의 조회수를 증가시켜야 한다.', async () => {
+    const COUNT_UNIT = 7;
+    const postId = 1;
+    const mockPost = { id: 1 } as Post;
+
+    mockPostRepository.findOneBy.mockResolvedValue(mockPost);
+    mockRedisService.incr.mockResolvedValue(7);
+
+    await service.incrementViewsCached(postId);
+
+    expect(mockRedisService.incr).toHaveBeenCalledWith(`posts:${postId}:views`);
+    expect(mockPostRepository.increment).toHaveBeenCalledWith(
+      { id: postId },
+      'views',
+      COUNT_UNIT,
+    );
+    expect(mockRedisService.set).toHaveBeenCalledWith(
+      `posts:${postId}:views`,
+      0,
+    );
+  });
+
+  it('포스트의 캐싱된 조회 수가 7의 배수가 아니면 DB의 조회수를 증가시키지 않아야 한다.', async () => {
+    const postId = 1;
+    const mockPost = { id: 1 } as Post;
+
+    mockPostRepository.findOneBy.mockResolvedValue(mockPost);
+    mockRedisService.incr.mockResolvedValue(6);
+
+    await service.incrementViewsCached(postId);
+
+    expect(mockRedisService.incr).toHaveBeenCalledWith(`posts:${postId}:views`);
+    expect(mockPostRepository.increment).not.toHaveBeenCalled();
+    expect(mockRedisService.set).not.toHaveBeenCalled();
+  });
+
+  it('포스트를 찾을 수 없을 때 에러를 반환한다.', async () => {
+    const postId = 999;
+    mockPostRepository.findOneBy.mockResolvedValue(null);
+
+    await expect(service.incrementViewsCached(postId)).rejects.toThrow(
+      `Post with id ${postId} not found`,
     );
   });
 
