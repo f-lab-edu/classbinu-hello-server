@@ -21,4 +21,16 @@ export class RedisService {
   async incr(key: string) {
     return await this.redis.incr(key);
   }
+
+  async expire(key: string, ttl: number) {
+    return await this.redis.expire(key, ttl);
+  }
+
+  async decrby(key: string, decrement: number) {
+    return await this.redis.decrby(key, decrement);
+  }
+
+  async keys(pattern: string) {
+    return await this.redis.keys(pattern);
+  }
 }

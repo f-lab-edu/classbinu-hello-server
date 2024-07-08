@@ -70,17 +70,32 @@ export class PostsService {
   }
 
   async incrementViewsCached(id: number) {
-    const COUNT_UNIT = 7;
-    const post = await this.postRepository.findOneBy({ id });
+    const BATCH_SIZE = 7;
 
+    const post = await this.postRepository.findOneBy({ id });
     if (!post) {
       throw new NotFoundException(`Post with id ${id} not found`);
     }
 
-    const newViewCount = await this.redisService.incr(`posts:${id}:views`);
-    if (newViewCount % COUNT_UNIT === 0) {
-      await this.postRepository.increment({ id }, 'views', newViewCount);
-      await this.redisService.set(`posts:${id}:views`, 0);
+    const key = `posts:${id}:views`;
+    const views = await this.redisService.incr(key);
+
+    if (views % BATCH_SIZE === 0) {
+      await this.postRepository.increment({ id }, 'views', BATCH_SIZE);
+      await this.redisService.decrby(key, BATCH_SIZE);
+    }
+  }
+
+  // 크론잡 메서드
+  async synchronizeRemainingViews() {
+    const keys = await this.redisService.keys('posts:*:views');
+    for (const key of keys) {
+      const count = parseInt(await this.redisService.get(key), 10);
+      if (count > 0) {
+        const id = parseInt(key.split(':')[1], 10);
+        await this.postRepository.increment({ id }, 'views', count);
+        await this.redisService.del(key);
+      }
     }
   }
 
