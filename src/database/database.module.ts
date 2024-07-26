@@ -16,6 +16,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         subscribers: ['post.subscriber.ts'],
         synchronize: true,
         logging: true,
+        extra: {
+          max: 90, // 최대 커넥션 수 (기본값 10)
+          idleTimeoutMillis: 10000, // 비활성 커넥션 타임아웃 (기본값 100000)
+          connectionTimeoutMillis: 2000, // 커넥션 타임아웃 (기본값 없으면 무한 대기?)
+        },
       }),
     }),
   ],
