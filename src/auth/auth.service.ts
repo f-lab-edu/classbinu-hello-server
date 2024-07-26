@@ -33,7 +33,13 @@ export class AuthService {
   }
 
   async hashData(data: string): Promise<string> {
-    return argon2.hash(data);
+    const hash = await argon2.hash(data, {
+      type: argon2.argon2id,
+      memoryCost: 1024,
+      timeCost: 2,
+      parallelism: 1,
+    });
+    return hash;
   }
 
   async signUp(createUserDto: CreateUserDto) {
